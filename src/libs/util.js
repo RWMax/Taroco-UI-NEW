@@ -1,42 +1,12 @@
-import log from './util.log.js'
-import cookies from './util.cookies.js'
+import cookies from './util.cookies'
+import db from './util.db'
+import log from './util.log'
 import { validatenull } from './validate'
 
-const TokenKey = 'x-access-token'
-let util = {
+const util = {
   cookies,
+  db,
   log
-}
-
-/**
- * 获取access_token
- */
-util.getToken = function () {
-  return util.cookies.get(TokenKey)
-}
-
-/**
- * 设置access_token
- */
-util.setToken = function (token) {
-  util.cookies.set(TokenKey, token)
-}
-
-/**
- * 删除access_token
- */
-util.removeToken = function () {
-  util.cookies.remove(TokenKey)
-}
-
-/**
- * 生成随机len位数字
- */
-util.randomLenNum = function (len, date) {
-  let random = ''
-  random = Math.ceil(Math.random() * 100000000000000).toString().substr(0, typeof len === 'number' ? len : 4)
-  if (date) random = random + Date.now()
-  return random
 }
 
 /**
@@ -76,49 +46,13 @@ function getMenu (menu, path) {
 }
 
 /**
- * 通过用户菜单生成路由信息
- *
- * @param {用户菜单} aMenu
+ * 生成随机len位数字
  */
-util.formatRoutes = function (aMenu, parentPath) {
-  if (validatenull(aMenu)) {
-    return []
-  }
-  const aRouter = []
-  aMenu.forEach(oMenu => {
-    const {
-      path,
-      component,
-      name,
-      icon,
-      children
-    } = oMenu
-
-    if (!validatenull(component)) {
-      const oRouter = {
-        path: parentPath ? parentPath + '/' + path : path,
-        component (resolve) {
-          let componentPath = ''
-          if (component === 'Layout') {
-            require(['@/layout/header-aside'], resolve)
-            return
-          } else {
-            componentPath = component
-          }
-          require([`../${componentPath}.vue`], resolve)
-        },
-        name: name,
-        icon: icon,
-        children: validatenull(children) ? [] : util.formatRoutes(children, path),
-        meta: {
-          requiresAuth: true,
-          title: name
-        }
-      }
-      aRouter.push(oRouter)
-    }
-  })
-  return aRouter
+util.randomLenNum = function (len, date) {
+  let random = ''
+  random = Math.ceil(Math.random() * 100000000000000).toString().substr(0, typeof len === 'number' ? len : 4)
+  if (date) random = random + Date.now()
+  return random
 }
 
 /**
@@ -138,10 +72,10 @@ util.open = function (url) {
   var a = document.createElement('a')
   a.setAttribute('href', url)
   a.setAttribute('target', '_blank')
-  a.setAttribute('id', 'd2admin-menu-link')
+  a.setAttribute('id', 'd2admin-link-temp')
   document.body.appendChild(a)
   a.click()
-  document.body.removeChild(document.getElementById('d2admin-menu-link'))
+  document.body.removeChild(document.getElementById('d2admin-link-temp'))
 }
 
 export default util

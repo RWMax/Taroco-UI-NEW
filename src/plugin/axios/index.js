@@ -14,8 +14,8 @@ const service = axios.create({
 
 // HTTPrequest拦截
 service.interceptors.request.use(config => {
-  if (util.getToken()) {
-    config.headers['Authorization'] = 'Bearer ' + util.getToken() // 让每个请求携带token--['X-Token']为自定义key 请根据实际情况自行修改
+  if (util.cookies.get('token')) {
+    config.headers['Authorization'] = 'Bearer ' + util.cookies.get('token') // 让每个请求携带token--['X-Token']为自定义key 请根据实际情况自行修改
   }
   return config
 }, error => {
@@ -44,6 +44,9 @@ service.interceptors.response.use(data => {
       switch (error.response.status) {
         case 400:
           errMsg = '错误请求, 请检查请求参数'
+          if (error.response.data.error_description) {
+            errMsg = error.response.data.error_description
+          }
           break
         case 401:
           errMsg = '当前操作没有权限'
@@ -51,7 +54,6 @@ service.interceptors.response.use(data => {
             errMsg = '无效的Token'
             util.cookies.remove('token')
             util.cookies.remove('uuid')
-            util.removeToken()
             // 清空db中用户数据
             store.dispatch('d2admin/db/databaseClear', {
               dbName: 'sys',
